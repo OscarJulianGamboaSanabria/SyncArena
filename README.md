@@ -10,19 +10,6 @@ Un **motor de juegos multijugador** es la infraestructura de software que permit
 
 Este proyecto busca construir esa base: un núcleo robusto, escalable y extensible sobre el cual se puedan montar distintos tipos de juegos (shooters, MOBAs, juegos casuales, etc.) sin tener que reinventar la rueda cada vez.
 
-**SyncArena** nace justamente de esa idea: una **arena** donde todos los jugadores están perfectamente **sincronizados**, sin importar cuántos sean ni desde dónde se conecten. ⚡
-
-### 🧩 ¿Por qué es difícil?
-
-Construir un motor así implica resolver retos que no existen en juegos de un solo jugador:
-
-- ⏱️ **Latencia y sincronización**: todos los jugadores deben ver "lo mismo" casi al mismo tiempo, aunque estén a miles de kilómetros de distancia.
-- 🔐 **Seguridad**: evitar trampas (cheats) validando la lógica del lado del servidor y no confiando en el cliente.
-- 📈 **Escalabilidad**: soportar desde 10 hasta miles de jugadores concurrentes sin que el sistema colapse.
-- 💾 **Persistencia**: guardar el progreso, rankings y economía del juego de forma confiable.
-- 🌐 **Tolerancia a fallos**: que la caída de un servidor no tumbe la experiencia de todos los jugadores.
-
----
 
 ## 🚀 Objetivo del Proyecto
 
@@ -40,8 +27,3 @@ Infraestructura económica del juego: compras dentro de la aplicación, monedas 
 ### 4. 📊 Escalabilidad para miles de jugadores concurrentes
 Arquitectura pensada para crecer horizontalmente, distribuyendo la carga entre múltiples servidores y garantizando estabilidad incluso en picos masivos de usuarios conectados.
 
----
-
-<p align="center">
-  Hecho con ❤️ para conectar jugadores alrededor del mundo 🌍
-</p>
