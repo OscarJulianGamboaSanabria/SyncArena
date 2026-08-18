@@ -1,7 +1,9 @@
 # 🎮 SyncArena — Motor de Juegos Multijugador
 
 > Un motor diseñado desde cero para dar vida a experiencias de juego en tiempo real, conectando a miles de jugadores en un mismo mundo compartido.
-
+> Alumnos:
+> Oscar Julian Gamboa Sanabria
+> Jesus Javier Garcia Rojas
 ---
 
 ## 📖 ¿Qué es esto?
