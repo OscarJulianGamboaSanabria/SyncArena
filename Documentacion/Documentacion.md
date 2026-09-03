@@ -407,7 +407,9 @@ Factory Method agrega una jerarquía de clases (un creador y un producto por tip
 ## 3. Diagrama del mecanismo
 
 Las flechas sólidas representan herencia (cada creador concreto extiende `NotificacionCreator`); las líneas punteadas representan qué producto construye cada creador. El código cliente solo conoce la caja superior e inferior, nunca las clases concretas del medio.
+
 ![[Pasted image 20260903083711.png]]
+
 
 ```
                   NotificacionCreator (abstracto)
