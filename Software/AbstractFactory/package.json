@@ -1,0 +1,12 @@
+{
+  "name": "abstract-factory-reward-system",
+  "version": "1.0.0",
+  "description": "Ejemplo del patrón Abstract Factory aplicado a un sistema de recompensas de videojuegos",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

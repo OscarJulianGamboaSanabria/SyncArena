@@ -1,3 +1,6 @@
+const { describe, test } = require('node:test');
+const assert = require('node:assert/strict');
+
 const {
   getRewardFactory,
   registerRewardFactory,
@@ -10,13 +13,13 @@ const Reward = require('../src/products/rewards/Reward');
 
 describe('factoryProvider: obtención de fábricas por tipo de juego', () => {
   test('retorna la fábrica correcta para cada género soportado', () => {
-    expect(getRewardFactory('shooter').getGameGenre()).toBe('shooter');
-    expect(getRewardFactory('MOBA').getGameGenre()).toBe('moba'); // case-insensitive
-    expect(getRewardFactory('casual').getGameGenre()).toBe('casual');
+    assert.equal(getRewardFactory('shooter').getGameGenre(), 'shooter');
+    assert.equal(getRewardFactory('MOBA').getGameGenre(), 'moba'); // case-insensitive
+    assert.equal(getRewardFactory('casual').getGameGenre(), 'casual');
   });
 
   test('lanza un error descriptivo si el tipo de juego no está registrado', () => {
-    expect(() => getRewardFactory('rts')).toThrow(/No existe una RewardSystemFactory/);
+    assert.throws(() => getRewardFactory('rts'), /No existe una RewardSystemFactory/);
   });
 
   test('permite registrar nuevas fábricas en tiempo de ejecución (extensibilidad / Open-Closed)', () => {
@@ -57,52 +60,54 @@ describe('factoryProvider: obtención de fábricas por tipo de juego', () => {
     registerRewardFactory('rts', RtsRewardFactory);
 
     const factory = getRewardFactory('rts');
-    expect(factory.getGameGenre()).toBe('rts');
-    expect(factory.createAchievement({ id: 'a1', name: 'Estratega' })).toBeInstanceOf(RtsAchievement);
+    assert.equal(factory.getGameGenre(), 'rts');
+    assert.ok(factory.createAchievement({ id: 'a1', name: 'Estratega' }) instanceof RtsAchievement);
   });
 });
 
 describe('Consistencia de familia por fábrica concreta', () => {
   const genres = ['shooter', 'moba', 'casual'];
 
-  test.each(genres)('la fábrica "%s" produce una familia de productos coherente entre sí', (genre) => {
-    const factory = getRewardFactory(genre);
+  for (const genre of genres) {
+    test(`la fábrica "${genre}" produce una familia de productos coherente entre sí`, () => {
+      const factory = getRewardFactory(genre);
 
-    const achievement = factory.createAchievement({ id: 'ach1', name: 'Logro', threshold: 10 });
-    const mission = factory.createMission({ id: 'mis1', name: 'Misión', goal: 5 });
-    const reward = factory.createReward({ id: 'rew1', name: 'Recompensa', baseCoins: 100, baseGems: 10 });
+      const achievement = factory.createAchievement({ id: 'ach1', name: 'Logro', threshold: 10 });
+      const mission = factory.createMission({ id: 'mis1', name: 'Misión', goal: 5 });
+      const reward = factory.createReward({ id: 'rew1', name: 'Recompensa', baseCoins: 100, baseGems: 10 });
 
-    // Todos deben respetar el contrato de sus productos abstractos.
-    expect(achievement).toBeInstanceOf(Achievement);
-    expect(mission).toBeInstanceOf(Mission);
-    expect(reward).toBeInstanceOf(Reward);
+      // Todos deben respetar el contrato de sus productos abstractos.
+      assert.ok(achievement instanceof Achievement);
+      assert.ok(mission instanceof Mission);
+      assert.ok(reward instanceof Reward);
 
-    // Y todos deben pertenecer al mismo género (la garantía central de Abstract Factory).
-    expect(achievement.genre).toBe(genre);
-    expect(mission.genre).toBe(genre);
-    expect(reward.genre).toBe(genre);
-  });
+      // Y todos deben pertenecer al mismo género (la garantía central de Abstract Factory).
+      assert.equal(achievement.genre, genre);
+      assert.equal(mission.genre, genre);
+      assert.equal(reward.genre, genre);
+    });
+  }
 });
 
 describe('Las clases abstractas no pueden instanciarse directamente', () => {
   test('Achievement lanza TypeError', () => {
-    expect(() => new Achievement({ id: 'x', name: 'x' })).toThrow(TypeError);
+    assert.throws(() => new Achievement({ id: 'x', name: 'x' }), TypeError);
   });
 
   test('Mission lanza TypeError', () => {
-    expect(() => new Mission({ id: 'x', name: 'x', goal: 1 })).toThrow(TypeError);
+    assert.throws(() => new Mission({ id: 'x', name: 'x', goal: 1 }), TypeError);
   });
 
   test('Reward lanza TypeError', () => {
-    expect(() => new Reward({ id: 'x', name: 'x' })).toThrow(TypeError);
+    assert.throws(() => new Reward({ id: 'x', name: 'x' }), TypeError);
   });
 
   test('RewardSystemFactory base lanza error si se llama sin overrides', () => {
     const factory = new RewardSystemFactory();
-    expect(() => factory.createAchievement({})).toThrow();
-    expect(() => factory.createMission({})).toThrow();
-    expect(() => factory.createReward({})).toThrow();
-    expect(() => factory.getGameGenre()).toThrow();
+    assert.throws(() => factory.createAchievement({}));
+    assert.throws(() => factory.createMission({}));
+    assert.throws(() => factory.createReward({}));
+    assert.throws(() => factory.getGameGenre());
   });
 });
 
@@ -111,44 +116,44 @@ describe('Comportamiento específico por género — Achievements', () => {
     const ach = getRewardFactory('shooter').createAchievement({
       id: 'a', name: 'Francotirador', statKey: 'kills', threshold: 10,
     });
-    expect(ach.checkUnlock({ kills: 5 })).toBe(false);
-    expect(ach.checkUnlock({ kills: 12 })).toBe(true);
+    assert.equal(ach.checkUnlock({ kills: 5 }), false);
+    assert.equal(ach.checkUnlock({ kills: 12 }), true);
   });
 
   test('MobaAchievement se desbloquea según assists', () => {
     const ach = getRewardFactory('moba').createAchievement({
       id: 'a', name: 'Apoyo total', statKey: 'assists', threshold: 20,
     });
-    expect(ach.checkUnlock({ assists: 15 })).toBe(false);
-    expect(ach.checkUnlock({ assists: 25 })).toBe(true);
+    assert.equal(ach.checkUnlock({ assists: 15 }), false);
+    assert.equal(ach.checkUnlock({ assists: 25 }), true);
   });
 
   test('CasualAchievement se desbloquea según niveles completados', () => {
     const ach = getRewardFactory('casual').createAchievement({
       id: 'a', name: 'Maratonista', statKey: 'levelsCompleted', threshold: 5,
     });
-    expect(ach.checkUnlock({ levelsCompleted: 3 })).toBe(false);
-    expect(ach.checkUnlock({ levelsCompleted: 6 })).toBe(true);
+    assert.equal(ach.checkUnlock({ levelsCompleted: 3 }), false);
+    assert.equal(ach.checkUnlock({ levelsCompleted: 6 }), true);
   });
 
   test('unlock() marca el logro como desbloqueado con timestamp', () => {
     const ach = getRewardFactory('shooter').createAchievement({ id: 'a', name: 'a', threshold: 1 });
-    expect(ach.unlocked).toBe(false);
+    assert.equal(ach.unlocked, false);
     ach.unlock();
-    expect(ach.unlocked).toBe(true);
-    expect(ach.unlockedAt).not.toBeNull();
+    assert.equal(ach.unlocked, true);
+    assert.notEqual(ach.unlockedAt, null);
   });
 });
 
 describe('Comportamiento específico por género — Missions', () => {
   test('las misiones acumulan progreso y se completan al llegar a la meta', () => {
     const mission = getRewardFactory('shooter').createMission({ id: 'm1', name: 'Elimina 10 enemigos', goal: 10 });
-    expect(mission.isCompleted()).toBe(false);
+    assert.equal(mission.isCompleted(), false);
     mission.addProgress(7);
-    expect(mission.isCompleted()).toBe(false);
+    assert.equal(mission.isCompleted(), false);
     mission.addProgress(5); // no debe pasarse de la meta
-    expect(mission.progress).toBe(10);
-    expect(mission.isCompleted()).toBe(true);
+    assert.equal(mission.progress, 10);
+    assert.equal(mission.isCompleted(), true);
   });
 
   test('la recompensa en monedas por misión varía según el género (shooter > moba > casual)', () => {
@@ -157,8 +162,8 @@ describe('Comportamiento específico por género — Missions', () => {
     const mobaMission = getRewardFactory('moba').createMission({ id: 'm', name: 'm', goal });
     const casualMission = getRewardFactory('casual').createMission({ id: 'm', name: 'm', goal });
 
-    expect(shooterMission.getCoinReward()).toBeGreaterThan(mobaMission.getCoinReward());
-    expect(mobaMission.getCoinReward()).toBeGreaterThan(casualMission.getCoinReward());
+    assert.ok(shooterMission.getCoinReward() > mobaMission.getCoinReward());
+    assert.ok(mobaMission.getCoinReward() > casualMission.getCoinReward());
   });
 });
 
@@ -169,8 +174,8 @@ describe('Comportamiento específico por género — Rewards', () => {
 
     reward.applyToWallet(wallet);
 
-    expect(wallet.coins).toBe(Math.round(100 * reward.getMultiplier()));
-    expect(wallet.gems).toBe(Math.round(10 * reward.getMultiplier()));
+    assert.equal(wallet.coins, Math.round(100 * reward.getMultiplier()));
+    assert.equal(wallet.gems, Math.round(10 * reward.getMultiplier()));
   });
 
   test('los multiplicadores económicos difieren entre géneros (shooter > moba > casual)', () => {
@@ -178,8 +183,8 @@ describe('Comportamiento específico por género — Rewards', () => {
     const moba = getRewardFactory('moba').createReward({ id: 'r', name: 'r' });
     const casual = getRewardFactory('casual').createReward({ id: 'r', name: 'r' });
 
-    expect(shooter.getMultiplier()).toBeGreaterThan(moba.getMultiplier());
-    expect(moba.getMultiplier()).toBeGreaterThan(casual.getMultiplier());
+    assert.ok(shooter.getMultiplier() > moba.getMultiplier());
+    assert.ok(moba.getMultiplier() > casual.getMultiplier());
   });
 
   test('applyToWallet acumula sobre saldo existente en vez de sobrescribirlo', () => {
@@ -188,7 +193,7 @@ describe('Comportamiento específico por género — Rewards', () => {
 
     reward.applyToWallet(wallet);
 
-    expect(wallet.coins).toBe(100 + Math.round(50 * reward.getMultiplier()));
-    expect(wallet.gems).toBe(10 + Math.round(5 * reward.getMultiplier()));
+    assert.equal(wallet.coins, 100 + Math.round(50 * reward.getMultiplier()));
+    assert.equal(wallet.gems, 10 + Math.round(5 * reward.getMultiplier()));
   });
 });
